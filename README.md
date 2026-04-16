@@ -70,7 +70,7 @@ http://127.0.0.1:8000/api/classify?name=john
 Deployment
 
 Deployed on Railway 
---link goes here
+https://stage-zero-production-e163.up.railway.app
 Testing
 
 Tested using:
