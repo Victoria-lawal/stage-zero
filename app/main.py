@@ -28,35 +28,27 @@ app.add_middleware(
 )
 
 @app.get("/api/classify")
-async def classify_name(name: str = Query(None)):
+async def classify_name(name: str = Query(...)):
 
-    # FIX 1: missing or empty name
-    if name is None or name.strip() == "":
-        return JSONResponse(
-            status_code=400,
-            content={
-                "status": "error",
-                "message": "Missing name parameter"
-            }
-        )
+    # 400 - missing handled by FastAPI automatically
 
-    # FIX 2: type check
     if not isinstance(name, str):
-        return JSONResponse(
-            status_code=422,
-            content={
-                "status": "error",
-                "message": "name must be a string"
-            }
-        )
+        raise HTTPException(status_code=422, detail="name must be a string")
 
     try:
         raw_data = await fetch_gender_data(name)
-    except:
-        return JSONResponse(
-            status_code=502,
-            content={
-                "status": "error",
-                "message": "External API failure"
-            }
-        )
+    except Exception:
+        raise HTTPException(status_code=502, detail="External API failure")
+
+    processed = process_data(raw_data)
+
+    if processed is None:
+        return {
+            "status": "error",
+            "message": "No prediction available for the provided name"
+        }
+
+    return {
+        "status": "success",
+        "data": processed
+    }
